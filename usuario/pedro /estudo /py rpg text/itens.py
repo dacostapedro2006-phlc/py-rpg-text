@@ -36,26 +36,45 @@ class amuleto(item):
 
     def usar_amuleto(self, jogador):
         print(f"{jogador.nome} usa o amuleto {self.nome} e ativa seu poder de {self.elemento} ({self.poder})")
+        
 
     @staticmethod
     def amuleto_randomico(classe_personagem):
-        if classe_personagem == "Mago":
+        if classe_personagem == "mago":
             lista = [
                 amuleto("amuleto de Fogo", "Fogo", 5),
                 amuleto("amuleto de Gelo", "Gelo", 5),
                 amuleto("amuleto de Raio", "Raio", 5)
             ]
-        elif classe_personagem == "Guerreiro":
+        elif classe_personagem == "guerreiro":
             lista = [
                 amuleto("amuleto da Força", "Força", 5),
                 amuleto("amuleto da Resistência", "Resistência", 5),
                 amuleto("amuleto da Vitalidade", "Vitalidade", 5)
             ]
-        elif classe_personagem == "Arqueiro":
+        elif classe_personagem == "arqueiro":
             lista = [
                 amuleto("amuleto da Agilidade", "Agilidade", 5),
                 amuleto("amuleto da Precisão", "Precisão", 5),
                 amuleto("amuleto da Velocidade", "Velocidade", 5)
+            ]
+        elif classe_personagem == " monstros":
+            lista = [
+                amuleto("amuleto da Força", "Força", 5),
+                amuleto("amuleto da Resistência", "Resistência", 5),
+                amuleto("amuleto da Vitalidade", "Vitalidade", 5)
+            ]
+        elif classe_personagem == "lobos":
+            lista = [
+                amuleto("amuleto da Força", "Força", 5),
+                amuleto("amuleto da Resistência", "Resistência", 5),
+                amuleto("amuleto da Vitalidade", "Vitalidade", 5)
+            ]
+        elif classe_personagem == "gigantes":
+            lista = [
+                amuleto("amuleto da Força", "Força", 5),
+                amuleto("amuleto da Resistência", "Resistência", 5),
+                amuleto("amuleto da Vitalidade", "Vitalidade", 5)
             ]
         return random.choice(lista)
 

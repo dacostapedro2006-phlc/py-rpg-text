@@ -8,7 +8,9 @@ import os
 import random
 import textos as tx           # Importa os textos do jogo
 import threading              # Para impressão lenta com possibilidade de Enter
-
+import save_game as sv        # Importa o módulo de save game            #salvar game
+import pygame
+import pyfiglet
 # ===================== FUNÇÃO DE BATALHA SIMPLES =====================
 def batalha_simples(jogador, inimigo):
     """
@@ -197,9 +199,48 @@ def limpar_tela(jogador=None, inimigo=None):
     if inimigo:
         print(pers.inimigos.vermelho + inimigo.status_horizontal_inimigo() + pers.inimigos.reset)
         print("-" * 80)
+#===========================================================
+#                         MENU
+#===========================================================
+init1 = True
+try:
+    while init1==True:
+        limpar_tela()
+        print(pyfiglet.figlet_format("RPG", font="slant"))
+        print("1 - Novo Jogo")
+        print("2 - Carregar Jogo")
+        print("3 - Sair")
+        escolha_inicial = input("Digite o número da escolha: ")
+        if escolha_inicial not in ["1", "2", "3"]:
+            print("Escolha inválida. Tente novamente.")
+            time.sleep(0.5)
+            init1 = True
+        else:
+            if escolha_inicial == "1":
+                init = True
+                init1 = False
+            if escolha_inicial == "2":
+                if sv.carregar_jogo() == None:
+                    init1 = True
+                else:
+                    init = True
+                    init1 = False
+            if escolha_inicial == "3":
+                init = False
+                init1 = False
+            
+except ValueError:
+    print("Por favor, digite um número válido.")
+    time.sleep(0.5)
+    init1= True
+
+
+
+
+
+
 
 # ===================== INÍCIO DO JOGO =====================
-init = True
 while init:
     limpar_tela()
     print("Capítulo 1 – Despertar na Clareira Misteriosa".upper())
@@ -250,7 +291,8 @@ while init:
 
     # ===================== INIMIGO =====================
     arma_lobo = arm.armas.armas_inimigos1_e_lobos()
-    lobo_gigante = pers.inimigos("lobo da floresta", 40, 4, 100)
+    lobo_gigante= pers.inimigos()
+    lobo_gigante.criar_inimigo("lobo gigante","lobos", 5)
     lobo_gigante.inventario.append(arma_lobo)
     graveto = arm.armas("graveto", dano=random.randint(30, 50), durabilidade=999)
 
@@ -281,4 +323,6 @@ while init:
     slow_print("Agora que você venceu sua primeira batalha, que tal dar uma olhada no seu inventário?", 0.05)
     input("Pressione Enter para abrir o inventário...")
     j1.mostrar_inventario()
+
+
     init = False

@@ -26,6 +26,9 @@ class personagens:
         self.vida_maxima = vida  # Armazena vida máxima para controle de poções
         self.arma = maos       # Inicialmente com arma padrão
         self.armadura = None   # Inicialmente sem armadura
+        self.mana = 100 if classe == "Mago" else 50  # Mana inicial baseada na classe
+        self.xp = 0             # Experiência inicial
+        self.nivel = 1          # Nível inicial
         self.inventario = []   # Inventário inicialmente vazio
 
     # --------------------------
@@ -51,7 +54,7 @@ class personagens:
         defesa = self.armadura.defesa if self.armadura else 0
         durabilidade = self.armadura.durabilidade if self.armadura else 0
         vida_display = f"{self.vida + dano_recebido} - {dano_recebido} = {self.vida}" if dano_recebido > 0 else str(self.vida)
-        return f"CLASSE: {self.classe} | NOME: {self.nome} | IDADE: {self.idade} | FORÇA: {self.forca} | AGILIDADE: {self.agilidade} | VIDA: {vida_display} | ARMA: {arma_nome} (dano:{dano_ataque})) | ARMADURA: {armadura_nome} (d:{defesa})(u:{durabilidade})"
+        return f"CLASSE: {self.classe} | NOME: {self.nome} | IDADE: {self.idade} | FORÇA: {self.forca} | AGILIDADE: {self.agilidade} | VIDA: {vida_display} | ARMA: {arma_nome} (dano:{dano_ataque})) | ARMADURA: {armadura_nome} (d:{defesa})(u:{durabilidade} \n | MANA: {self.mana} | NÍVEL: {self.nivel} | XP: {self.xp} | ITENS: {len(self.inventario)}"
 
     # --------------------------
     # Mostrar inventário do jogador
@@ -162,6 +165,16 @@ class personagens:
             alvo.receber_dano(dano)
         else:
             print(f"{self.nome} não tem uma arma equipada e não pode atacar!")
+        self.xp += 10  # Ganha XP por atacar
+        if self.xp >= self.nivel * 100:
+            self.nivel += 1
+            self.xp = 0
+            self.forca += 1
+            self.agilidade += 1
+            self.vida_maxima += 10
+            self.vida = self.vida_maxima
+            print(f"{self.nome} subiu para o nível {self.nivel}! Atributos aumentados.")
+        self.receber_mana(5, alvo)  # Ganha mana ao atacar inimigos mágicos
     
     def receber_dano(self, dano):
         defesa_total = 0
@@ -190,6 +203,7 @@ class personagens:
         else:
             print(f"{self.nome} agora tem {self.vida} de vida.")
 
+
     # --------------------------
     # Fugir da batalha
     # --------------------------
@@ -212,6 +226,29 @@ class personagens:
         if self.vida > self.vida_maxima:
             self.vida = self.vida_maxima
         print(f"{self.nome} recebeu um bônus de status: {status}")
+    # --------------------------
+    # Receber XP por completar quests
+    # --------------------------
+    def receber_xp_quest(self, xp):
+        self.xp += xp
+        print(f"{self.nome} recebeu {xp} de XP por completar a quest!")
+        if self.xp >= self.nivel * 100:
+            self.nivel += 1
+            self.xp = 0
+            self.forca += 1
+            self.agilidade += 1
+            self.vida_maxima += 10
+            self.vida = self.vida_maxima
+            print(f"{self.nome} subiu para o nível {self.nivel}! Atributos aumentados.")
+    # --------------------------        
+    # Receber mana ao atacar inimigos mágicos
+    # --------------------------
+    def receber_mana(self, quantidade, inimigo):
+        if inimigo.raca == "magico":
+            self.mana += quantidade
+            if self.mana > 100:
+                self.mana = 100
+            print(f"{self.nome} recuperou {quantidade} de mana! Mana atual: {self.mana}")
 
     # --------------------------
     # Inventário geral
@@ -227,13 +264,47 @@ class inimigos:
     vermelho = "\033[91m"  # Cor para inimigo
     reset = "\033[0m"      # Reset cor
 
-    def __init__(self, nome, forca, agilidade, vida):
-        self.nome = nome
-        self.forca = forca
-        self.agilidade = agilidade
-        self.vida = vida
+    def __init__(self):
+        # Atributos base
+        self.nome = None
+        self.forca = 0
+        self.agilidade = 0
+        self.vida = 0
         self.inventario = []
         self.armadura = None
+        self.raca = None
+        self.nivel = 1
+
+    def criar_inimigo(self, nome, raca, nivel):
+        # Define informações principais
+        self.nome = f"{self.vermelho}{nome}{self.reset}"
+        self.raca = raca
+        self.nivel = nivel
+
+        # Atributos por raça
+        if raca == "magicos":
+            self.forca = 2 * nivel
+            self.agilidade = 3 * nivel
+            self.vida = 30 * nivel
+            self.inventario.append(itens.amuleto.amuleto_randomico("mago"))
+
+        elif raca == "lobos":
+            self.forca = 4 * nivel
+            self.agilidade = 2 * nivel
+            self.vida = 40 * nivel
+            self.inventario.append(itens.amuleto.amuleto_randomico("lobos"))
+
+        elif raca == "gigantes":
+            self.forca = 5 * nivel
+            self.agilidade = 1 * nivel
+            self.vida = 50 * nivel
+            self.inventario.append(itens.amuleto.amuleto_randomico("gigante"))
+
+        elif raca == "monstros":
+            self.forca = 3 * nivel
+            self.agilidade = 2 * nivel
+            self.vida = 35 * nivel
+            self.inventario.append(itens.amuleto.amuleto_randomico("monstro"))
 
     def equipar_item(self, item):
         self.inventario.append(item)
@@ -243,8 +314,16 @@ class inimigos:
 
     def status_horizontal_inimigo(self, dano_recebido=0):
         nomes_itens = [item.nome for item in self.inventario if hasattr(item, "nome")]
-        vida_display = f"{self.vida + dano_recebido} - {dano_recebido} = {self.vida}" if dano_recebido > 0 else str(self.vida)
-        return f"NOME: {self.nome} | FORÇA: {self.forca} | AGILIDADE: {self.agilidade} | VIDA: {vida_display} | ITENS: {', '.join(nomes_itens) if nomes_itens else '---'}"
+        vida_display = (
+            f"{self.vida + dano_recebido} - {dano_recebido} = {self.vida}"
+            if dano_recebido > 0 else str(self.vida)
+        )
+        return (
+            f"NOME: {self.nome} | FORÇA: {self.forca} | "
+            f"AGILIDADE: {self.agilidade} | VIDA: {vida_display} | "
+            f"ITENS: {', '.join(nomes_itens) if nomes_itens else '---'} | "
+            f"NÍVEL: {self.nivel}"
+        )
 
     def receber_dano(self, dano):
         defesa_total = 0
